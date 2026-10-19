@@ -1,0 +1,24 @@
+{
+  "name": "@loremus299/pineapple",
+  "version": "1.0.0",
+  "description": "OpenAPI 3.0.0 Typescript Generator with Zod.",
+  "keywords": [
+    "openapi",
+    "zod"
+  ],
+  "homepage": "https://github.com/Loremus299/pineapple#readme",
+  "bugs": {
+    "url": "https://github.com/Loremus299/pineapple/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loremus299/pineapple.git"
+  },
+  "license": "MIT",
+  "author": "Loremus",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
