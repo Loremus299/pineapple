@@ -34,7 +34,33 @@ type Method =
 	| "head"
 	| "options"
 	| "trace";
-type ContentType = "application/json";
+
+type ContentType =
+	| string
+	| "application/json"
+	| "application/xml"
+	| "application/pdf"
+	| "application/zip"
+	| "application/x-www-form-urlencoded"
+	| "audio/mpeg"
+	| "audio/x-wav"
+	| "image/gif"
+	| "image/png"
+	| "image/jpeg"
+	| "image/tiff"
+	| "image/x-icon"
+	| "image/svg-xml"
+	| "multipart/form-data"
+	| "text/plain"
+	| "text/csv"
+	| "text/xml"
+	| "text/html"
+	| "text/css"
+	| "text/javascript"
+	| "video/mpeg"
+	| "video/mp4"
+	| "video/quicktime"
+	| "video/webm";
 
 interface OpenAPIObject {
 	openapi: string;
