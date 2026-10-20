@@ -1,11 +1,11 @@
-export type Pineapple<T, E> =
+export type ResultType<T, E> =
 	| { success: true; data: T }
 	| { success: false; error: E };
 
 export class Result<T, E> {
-	public readonly value: Pineapple<T, E>;
+	public readonly value: ResultType<T, E>;
 
-	private constructor(value: Pineapple<T, E>) {
+	private constructor(value: ResultType<T, E>) {
 		this.value = value;
 	}
 
@@ -132,6 +132,6 @@ export class Result<T, E> {
 	}
 
 	public type() {
-		return this.value as Pineapple<T, E>;
+		return this.value as ResultType<T, E>;
 	}
 }
