@@ -59,7 +59,7 @@ export class OpenAPIBasePath {
 		status: number,
 		description: string,
 		type: string,
-		zod: z.ZodAny,
+		zod: z.ZodObject,
 	) {
 		this.operation.responses[String(status)] = {
 			description,
@@ -81,7 +81,7 @@ export class OpenAPIBasePath {
 			{
 				description: string;
 				type: string;
-				zod: z.ZodAny;
+				zod: z.ZodObject;
 			}
 		>,
 	) {
@@ -111,5 +111,9 @@ export default class OpenAPI {
 
 	public path(path: string, method: Method) {
 		return new OpenAPIBasePath(this.ctx.paths, path, method);
+	}
+
+	public get json() {
+		return this.ctx;
 	}
 }
