@@ -37,11 +37,10 @@ export class Result<T, E> {
 	}
 
 	public static async tryCatch<T, V>(
-		data: V,
-		fun: (data: V) => Promise<T>,
+		fun: () => Promise<T>,
 	): Promise<Result<T, unknown>> {
 		try {
-			const res = await fun(data);
+			const res = await fun();
 			return Result.ok(res);
 		} catch (error) {
 			return Result.error(error);
@@ -110,28 +109,16 @@ export class Result<T, E> {
 		return this;
 	}
 
-	public isOk(): this is Result<T, E> & { value: { success: true; data: T } } {
-		return this.value.success;
-	}
-
-	public isError(): this is Result<T, E> & {
-		value: { success: false; error: E };
-	} {
-		return !this.value.success;
-	}
-
-	get data(): this extends { value: { success: true; data: T } }
-		? T
-		: this extends { value: { success: false; error: E } }
-			? E
-			: Result<T, E> {
-		if (this.value.success) {
-			return this.value.data as any;
-		}
-		return this.value.error as any;
-	}
-
 	public type() {
 		return this.value as ResultType<T, E>;
+	}
+
+	public documentFunction(
+		fun: (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+	) {
+		type Returns = Awaited<ReturnType<typeof fun>>;
+		type Params = Parameters<typeof fun>;
+		type ReturnSuccess = Returns extends Result<infer T, E> ? T : never;
+		type ReturnFailure = Returns extends Result<T, infer E> ? never : E;
 	}
 }
