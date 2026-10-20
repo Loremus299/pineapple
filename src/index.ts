@@ -3,7 +3,7 @@ export type ResultType<T, E> =
 	| { success: false; error: E };
 
 export class Result<T, E> {
-	public readonly value: ResultType<T, E>;
+	private readonly value: ResultType<T, E>;
 
 	private constructor(value: ResultType<T, E>) {
 		this.value = value;
@@ -109,16 +109,30 @@ export class Result<T, E> {
 		return this;
 	}
 
-	public type() {
+	public get type() {
 		return this.value as ResultType<T, E>;
 	}
 
-	public documentFunction(
-		fun: (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+	public get outcome() {
+		return this.value;
+	}
+
+	public documentFunction<
+		F extends (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+	>(
+		fun: F,
+		meta: {
+			args: Parameters<F>;
+			success: ReturnType<Awaited<F>> extends Result<infer T, E> ? T : never;
+			error: ReturnType<Awaited<F>> extends Result<T, infer E> ? E : never;
+		},
 	) {
-		type Returns = Awaited<ReturnType<typeof fun>>;
-		type Params = Parameters<typeof fun>;
-		type ReturnSuccess = Returns extends Result<infer T, E> ? T : never;
-		type ReturnFailure = Returns extends Result<T, infer E> ? E : never;
+		return {
+			name: fun.name,
+			parameters: meta.args,
+			success: meta.success,
+			error: meta.error,
+			source: fun.toString(),
+		};
 	}
 }
