@@ -119,6 +119,6 @@ export class Result<T, E> {
 		type Returns = Awaited<ReturnType<typeof fun>>;
 		type Params = Parameters<typeof fun>;
 		type ReturnSuccess = Returns extends Result<infer T, E> ? T : never;
-		type ReturnFailure = Returns extends Result<T, infer E> ? never : E;
+		type ReturnFailure = Returns extends Result<T, infer E> ? E : never;
 	}
 }
