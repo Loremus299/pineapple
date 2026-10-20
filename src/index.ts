@@ -25,7 +25,7 @@ interface OpenAPIPath {
 	};
 }
 
-interface OpenAPIObject {
+interface OpenAPIBaseObject {
 	openapi: string;
 	info: {
 		title: string;
@@ -44,8 +44,62 @@ type Method =
 	| "options"
 	| "trace";
 
-export class OpenAPI {
-	private readonly ctx: OpenAPIObject;
+export class OpenAPIBasePath {
+	private readonly operation: OpenAPIOperation;
+
+	constructor(ctx: OpenAPIPath, path: string, method: Method) {
+		ctx[path] ??= {};
+
+		this.operation = ctx[path][method] ??= {
+			responses: {},
+		};
+	}
+
+	public response(
+		status: number,
+		description: string,
+		type: string,
+		zod: z.ZodAny,
+	) {
+		this.operation.responses[String(status)] = {
+			description,
+			content: {
+				[type]: {
+					schema: zod.toJSONSchema({
+						target: "openapi-3.0",
+					}),
+				},
+			},
+		};
+
+		return this;
+	}
+
+	public responses(
+		response: Record<
+			number,
+			{
+				description: string;
+				type: string;
+				zod: z.ZodAny;
+			}
+		>,
+	) {
+		for (const [status, details] of Object.entries(response)) {
+			this.response(
+				Number(status),
+				details.description,
+				details.type,
+				details.zod,
+			);
+		}
+
+		return this;
+	}
+}
+
+export default class OpenAPI {
+	private readonly ctx: OpenAPIBaseObject;
 
 	constructor(openapi: string, info: { title: string; version: string }) {
 		this.ctx = {
@@ -55,39 +109,7 @@ export class OpenAPI {
 		};
 	}
 
-	public path(
-		path: string,
-		method: Method,
-		{
-			summary,
-			description,
-			tags,
-		}: { summary?: string; description?: string; tags?: string[] },
-	) {
-		this.ctx.paths[path] ??= {};
-
-		this.ctx.paths[path][method] = {
-			...(summary && { summary: summary }),
-			...(description && { description: description }),
-			...(tags && { tags: tags }),
-			responses: {},
-		};
-	}
-
-	public response(
-		path: string,
-		method: Method,
-		status: number,
-		description: string,
-		type: string,
-		zodSchema: z.ZodObject,
-	) {
-		this.ctx.paths[path] ??= {};
-		this.ctx.paths[path][method].responses[String(status)] = {
-			description,
-			content: {
-				[type]: { schema: zodSchema.toJSONSchema({ target: "openapi-3.0" }) },
-			},
-		};
+	public path(path: string, method: Method) {
+		return new OpenAPIBasePath(this.ctx.paths, path, method);
 	}
 }
