@@ -125,9 +125,7 @@ export default class Result<T, E> {
 		title: string,
 		fun: F,
 		meta: {
-			args: {
-				[K in keyof Parameters<F>]-?: unknown;
-			};
+			args: DocumentedArgs<Parameters<F>>;
 			success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
 			error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 		},
@@ -150,8 +148,12 @@ export type DocumentedFunction<
 > = {
 	title: string;
 	name: string;
-	parameters: { [K in keyof Parameters<F>]-?: unknown };
+	parameters: DocumentedArgs<Parameters<F>>;
 	success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
 	error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 	source: string;
+};
+
+type DocumentedArgs<P extends unknown[]> = {
+	[K in keyof P]-?: unknown;
 };
