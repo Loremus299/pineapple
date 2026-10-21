@@ -121,17 +121,18 @@ export default class Result<T, E> {
 		T,
 		E,
 		F extends (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+		M,
 	>(
-		title: string,
+		description: string,
 		fun: F,
 		meta: {
-			args: DocumentedArgs<Parameters<F>>;
+			args: DocumentedArgs<Parameters<F>, M>;
 			success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
 			error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 		},
-	): DocumentedFunction<T, E, F> {
+	): DocumentedFunction<T, E, F, M> {
 		return {
-			title,
+			description,
 			name: fun.name,
 			parameters: meta.args,
 			success: meta.success,
@@ -145,15 +146,23 @@ export type DocumentedFunction<
 	T,
 	E,
 	F extends (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+	M,
 > = {
-	title: string;
+	[x: string]: any;
+	description: string;
 	name: string;
-	parameters: DocumentedArgs<Parameters<F>>;
+	parameters: DocumentedArgs<Parameters<F>, M>;
 	success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
 	error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 	source: string;
 };
 
-type DocumentedArgs<P extends unknown[]> = {
-	[K in keyof P]-?: unknown;
+type DocumentedValue<T, M> = T extends readonly unknown[]
+	? { [K in keyof T]: DocumentedValue<T[K], M> }
+	: T extends object
+		? { [K in keyof T]: DocumentedValue<T[K], M> }
+		: M;
+
+type DocumentedArgs<P extends unknown[], M> = {
+	[K in keyof P]-?: DocumentedValue<P[K], M>;
 };
