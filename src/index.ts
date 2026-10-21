@@ -2,7 +2,7 @@ export type ResultType<T, E> =
 	| { success: true; data: T }
 	| { success: false; error: E };
 
-export class Result<T, E> {
+export default class Result<T, E> {
 	private readonly value: ResultType<T, E>;
 
 	private constructor(value: ResultType<T, E>) {
