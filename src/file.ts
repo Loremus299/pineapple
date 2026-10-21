@@ -45,5 +45,3 @@ const raw = Result.documentFunction<unknown, unknown, typeof deploy, Cli>(
 		error: {},
 	},
 );
-
-console.log(JSON.stringify(raw, null, 2));
