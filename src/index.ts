@@ -131,7 +131,7 @@ export default class Result<T, E> {
 			success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
 			error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 		},
-	) {
+	): DocumentedFunction<T, E, F> {
 		return {
 			title,
 			name: fun.name,
@@ -142,3 +142,16 @@ export default class Result<T, E> {
 		};
 	}
 }
+
+export type DocumentedFunction<
+	T,
+	E,
+	F extends (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
+> = {
+	title: string;
+	name: string;
+	parameters: { [K in keyof Parameters<F>]-?: unknown };
+	success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
+	error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
+	source: string;
+};

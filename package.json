@@ -1,9 +1,10 @@
 {
   "name": "@loremus299/pineapple",
   "version": "1.0.0",
-  "description": "Typesafe side effects and error handling for Typescript.",
+  "description": "Typesafe side effects and error handling for Typescript. With an opinionated documentation generator for your code.",
   "keywords": [
-    "typescript"
+    "typescript",
+    "docs"
   ],
   "homepage": "https://github.com/Loremus299/pineapple#readme",
   "bugs": {
