@@ -117,17 +117,23 @@ export class Result<T, E> {
 		return this.value;
 	}
 
-	public documentFunction<
+	public static documentFunction<
+		T,
+		E,
 		F extends (...args: any[]) => Result<T, E> | Promise<Result<T, E>>,
 	>(
+		title: string,
 		fun: F,
 		meta: {
-			args: Parameters<F>;
-			success: ReturnType<Awaited<F>> extends Result<infer T, E> ? T : never;
-			error: ReturnType<Awaited<F>> extends Result<T, infer E> ? E : never;
+			args: {
+				[K in keyof Parameters<F>]-?: unknown;
+			};
+			success: Awaited<ReturnType<F>> extends Result<infer T, E> ? T : never;
+			error: Awaited<ReturnType<F>> extends Result<T, infer E> ? E : never;
 		},
 	) {
 		return {
+			title,
 			name: fun.name,
 			parameters: meta.args,
 			success: meta.success,

@@ -1,10 +1,9 @@
 {
   "name": "@loremus299/pineapple",
   "version": "1.0.0",
-  "description": "OpenAPI 3.0.0 Typescript Generator with Zod.",
+  "description": "Typesafe side effects and error handling for Typescript.",
   "keywords": [
-    "openapi",
-    "zod"
+    "typescript"
   ],
   "homepage": "https://github.com/Loremus299/pineapple#readme",
   "bugs": {
@@ -18,8 +17,6 @@
   "author": "Loremus",
   "scripts": {
     "generate": "tsdown"
-  },
-  "dependencies": {
   },
   "devDependencies": {
     "tsdown": "^0.23.1",
