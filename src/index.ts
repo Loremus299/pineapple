@@ -17,15 +17,14 @@ export default class Result<T, E> {
 		return new Result<T, E>({ success: false, error });
 	}
 
-	public static async fallback<T, E, V>(
-		data: V,
+	public static async fallback<T, E>(
 		defaultError: E,
-		funs: Array<(arg: V) => Promise<Result<T, E>>>,
+		funs: Array<() => Promise<Result<T, E>>>,
 	): Promise<Result<T, E>> {
 		let lastError: E = defaultError;
 
 		for (const fun of funs) {
-			const res: Result<T, E> = await fun(data);
+			const res: Result<T, E> = await fun();
 			if (res.value.success) {
 				return res;
 			}
