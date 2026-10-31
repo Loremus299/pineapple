@@ -19,7 +19,7 @@
 		"generate": "tsdown"
 	},
 	"peerDependencies": {
-		"drizzle-orm": "latest"
+		"drizzle-orm": "^1.0.0-rc.4"
 	},
 	"peerDependenciesMeta": {
 		"drizzle-orm": {
@@ -27,7 +27,7 @@
 		}
 	},
 	"devDependencies": {
-		"drizzle-orm": "latest",
+		"drizzle-orm": "^1.0.0-rc.4",
 		"tsdown": "^0.23.1",
 		"typescript": "^7.0.2"
 	},
