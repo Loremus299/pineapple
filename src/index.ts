@@ -2,6 +2,8 @@ export type ResultType<T, E> =
 	| { success: true; data: T }
 	| { success: false; error: E };
 
+export const NoRows = Symbol("NoRows");
+
 export default class Result<T, E> {
 	private readonly value: ResultType<T, E>;
 
@@ -52,7 +54,11 @@ export default class Result<T, E> {
 		results: Vs,
 	): Promise<
 		Result<
-			{ [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never },
+			{
+				[K in keyof Vs]: Vs[K] extends Promise<Result<infer T, unknown>>
+					? T
+					: never;
+			},
 			null
 		>
 	> {
@@ -68,9 +74,16 @@ export default class Result<T, E> {
 
 		return Result.ok(
 			settled as {
-				[K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
+				[K in keyof Vs]: Vs[K] extends Promise<Result<infer T, unknown>>
+					? T
+					: never;
 			},
 		);
+	}
+	public one<TA, F>(this: Result<TA[], F>): Result<TA, F | typeof NoRows> {
+		if (!this.value.success) return Result.error(this.value.error);
+		if (this.value.data.length === 0) return Result.error(NoRows);
+		return Result.ok(this.value.data[0] as TA);
 	}
 
 	public match<R>(onOk: (t: T) => R, onErr: (e: E) => R): R {
