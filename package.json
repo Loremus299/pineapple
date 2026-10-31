@@ -18,16 +18,7 @@
 	"scripts": {
 		"generate": "tsdown"
 	},
-	"peerDependencies": {
-		"drizzle-orm": "^1.0.0-rc.4"
-	},
-	"peerDependenciesMeta": {
-		"drizzle-orm": {
-			"optional": true
-		}
-	},
 	"devDependencies": {
-		"drizzle-orm": "^1.0.0-rc.4",
 		"tsdown": "^0.23.1",
 		"typescript": "^7.0.2"
 	},
