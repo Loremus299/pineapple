@@ -3,6 +3,7 @@ export type ResultType<T, E> =
 	| { success: false; error: E };
 
 export const NoRows = Symbol("NoRows");
+export const Pineapple = Symbol("Pineapple");
 
 export default class Result<T, E> {
 	private readonly value: ResultType<T, E>;
@@ -37,14 +38,16 @@ export default class Result<T, E> {
 		return Result.error<T, E>(lastError);
 	}
 
-	public static async tryCatch<T, V>(
+	public static async tryCatch<T, E extends Error>(
 		fun: () => Promise<T>,
-	): Promise<Result<T, unknown>> {
+		error: new (...args: any[]) => E,
+	): Promise<Result<T, E | typeof Pineapple>> {
 		try {
 			const res = await fun();
 			return Result.ok(res);
-		} catch (error) {
-			return Result.error(error);
+		} catch (e) {
+			if (e instanceof error) return Result.error(e as E);
+			return Result.error(Pineapple);
 		}
 	}
 
@@ -102,23 +105,35 @@ export default class Result<T, E> {
 			: Result.error<T, F>(fun(this.value.error));
 	}
 
-	public unrelated(fun: () => unknown): Result<T, E> {
-		fun();
+	public unrelated(fun: (arg: Result<T, E>) => unknown): Result<T, E> {
+		fun(this);
 		return this;
 	}
 
 	public onOk(fun: (arg: T) => unknown): Result<T, E> {
-		if (this.value.success) {
-			fun(this.value.data);
-		}
+		if (this.value.success) fun(this.value.data);
 		return this;
 	}
 
 	public onError(fun: (arg: E) => unknown): Result<T, E> {
-		if (!this.value.success) {
-			fun(this.value.error);
-		}
+		if (!this.value.success) fun(this.value.error);
 		return this;
+	}
+
+	public chainOk<R, F>(fun: (arg: T) => Result<R, F>): Result<R, E | F> {
+		if (this.value.success) {
+			const res = fun(this.value.data);
+			if (res.value.success) return Result.ok(res.value.data);
+			else return Result.error(res.value.error);
+		} else return Result.error(this.value.error);
+	}
+
+	public chainError<R, F>(fun: (arg: E) => Result<R, F>): Result<T | R, F> {
+		if (!this.value.success) {
+			const res = fun(this.value.error);
+			if (res.value.success) return Result.ok(res.value.data);
+			else return Result.error(res.value.error);
+		} else return Result.ok(this.value.data);
 	}
 
 	public get type() {
