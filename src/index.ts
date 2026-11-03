@@ -120,17 +120,21 @@ export default class Result<T, E> {
 		return this;
 	}
 
-	public chainOk<R, F>(fun: (arg: T) => Result<R, F>): Result<R, E | F> {
+	public async chainOk<R, F>(
+		fun: (arg: T) => Promise<Result<R, F>>,
+	): Promise<Result<R, E | F>> {
 		if (this.value.success) {
-			const res = fun(this.value.data);
+			const res = await fun(this.value.data);
 			if (res.value.success) return Result.ok(res.value.data);
 			else return Result.error(res.value.error);
 		} else return Result.error(this.value.error);
 	}
 
-	public chainError<R, F>(fun: (arg: E) => Result<R, F>): Result<T | R, F> {
+	public async chainError<R, F>(
+		fun: (arg: E) => Promise<Result<R, F>>,
+	): Promise<Result<T | R, F>> {
 		if (!this.value.success) {
-			const res = fun(this.value.error);
+			const res = await fun(this.value.error);
 			if (res.value.success) return Result.ok(res.value.data);
 			else return Result.error(res.value.error);
 		} else return Result.ok(this.value.data);
