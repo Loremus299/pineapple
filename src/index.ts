@@ -1,8 +1,4 @@
-export type PineError = { kind: string };
-
-export type PineType<T, E extends PineError> =
-	| { success: true; data: T }
-	| { success: false; error: E };
+import { PineError, PineType } from "./types";
 
 export default class PineApple<T, const E extends PineError> {
 	private constructor(private readonly value: PineType<T, E>) {}
@@ -13,5 +9,9 @@ export default class PineApple<T, const E extends PineError> {
 
 	public static error<T, const E extends PineError>(error: E) {
 		return new PineApple<T, E>({ success: false, error });
+	}
+
+	public get outcome(): PineType<T, E> {
+		return this.value;
 	}
 }
