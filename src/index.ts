@@ -91,7 +91,24 @@ export default class PineApple<T, const E extends PineError> {
 		return PineApple.ok(this.value.data);
 	}
 
-	public one() {}
+	public nth(
+		this: PineApple<T[], E>,
+		n: number,
+	): PineApple<
+		T,
+		E | { kind: "IndexOutOfBounds"; index: number; length: number }
+	> {
+		if (this.value.success) {
+			const e = this.value.data.at(n);
+			if (e) return PineApple.ok(e);
+			return PineApple.error({
+				kind: "IndexOutOfBounds",
+				index: n,
+				length: this.value.data.length,
+			});
+		}
+		return PineApple.error(this.value.error);
+	}
 
 	public get promise() {
 		return {
