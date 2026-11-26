@@ -16,7 +16,7 @@ export default class PineApple<T, const E extends PineError> {
 	}
 
 	public static attempt<R, K extends string>(
-		fun: (...args: any[]) => R,
+		fun: () => R,
 		kind: K,
 	): PineApple<R, { kind: K; error: unknown }> {
 		try {
@@ -29,7 +29,7 @@ export default class PineApple<T, const E extends PineError> {
 
 	public static readonly promise = {
 		attempt: async <R, K extends string>(
-			fun: (...args: any[]) => Promise<R>,
+			fun: () => Promise<R>,
 			kind: K,
 		): Promise<PineApple<R, { kind: K; error: unknown }>> => {
 			try {
