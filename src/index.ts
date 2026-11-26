@@ -91,64 +91,68 @@ export default class PineApple<T, const E extends PineError> {
 		return PineApple.ok(this.value.data);
 	}
 
-	public readonly promise = {
-		onOk: async (
-			fun: (data: T) => Promise<unknown>,
-		): Promise<PineApple<T, E>> => {
-			if (this.value.success) {
-				await fun(this.value.data);
-				return PineApple.ok(this.value.data);
-			}
-			return PineApple.error(this.value.error);
-		},
+	public one() {}
 
-		onError: async (
-			fun: (data: E) => Promise<unknown>,
-		): Promise<PineApple<T, E>> => {
-			if (!this.value.success) {
-				await fun(this.value.error);
+	public get promise() {
+		return {
+			onOk: async (
+				fun: (data: T) => Promise<unknown>,
+			): Promise<PineApple<T, E>> => {
+				if (this.value.success) {
+					await fun(this.value.data);
+					return PineApple.ok(this.value.data);
+				}
 				return PineApple.error(this.value.error);
-			}
-			return PineApple.ok(this.value.data);
-		},
+			},
 
-		mapOk: async <R>(
-			fun: (data: T) => Promise<R>,
-		): Promise<PineApple<R, E>> => {
-			if (this.value.success) return PineApple.ok(await fun(this.value.data));
-			return PineApple.error(this.value.error);
-		},
+			onError: async (
+				fun: (data: E) => Promise<unknown>,
+			): Promise<PineApple<T, E>> => {
+				if (!this.value.success) {
+					await fun(this.value.error);
+					return PineApple.error(this.value.error);
+				}
+				return PineApple.ok(this.value.data);
+			},
 
-		mapError: async <const F extends PineError>(
-			fun: (data: E) => Promise<F>,
-		): Promise<PineApple<T, F>> => {
-			if (!this.value.success)
-				return PineApple.error(await fun(this.value.error));
-			return PineApple.ok(this.value.data);
-		},
+			mapOk: async <R>(
+				fun: (data: T) => Promise<R>,
+			): Promise<PineApple<R, E>> => {
+				if (this.value.success) return PineApple.ok(await fun(this.value.data));
+				return PineApple.error(this.value.error);
+			},
 
-		chainOk: async <R, const F extends PineError>(
-			fun: (data: T) => Promise<PineApple<R, F>>,
-		): Promise<PineApple<R, E | F>> => {
-			if (this.value.success) {
-				const p = await fun(this.value.data);
-				if (p.value.success) return PineApple.ok(p.value.data);
-				return PineApple.error(p.value.error);
-			}
-			return PineApple.error(this.value.error);
-		},
+			mapError: async <const F extends PineError>(
+				fun: (data: E) => Promise<F>,
+			): Promise<PineApple<T, F>> => {
+				if (!this.value.success)
+					return PineApple.error(await fun(this.value.error));
+				return PineApple.ok(this.value.data);
+			},
 
-		chainError: async <R, const F extends PineError>(
-			fun: (data: E) => Promise<PineApple<R, F>>,
-		): Promise<PineApple<T | R, F>> => {
-			if (!this.value.success) {
-				const p = await fun(this.value.error);
-				if (p.value.success) return PineApple.ok(p.value.data);
-				return PineApple.error(p.value.error);
-			}
-			return PineApple.ok(this.value.data);
-		},
-	};
+			chainOk: async <R, const F extends PineError>(
+				fun: (data: T) => Promise<PineApple<R, F>>,
+			): Promise<PineApple<R, E | F>> => {
+				if (this.value.success) {
+					const p = await fun(this.value.data);
+					if (p.value.success) return PineApple.ok(p.value.data);
+					return PineApple.error(p.value.error);
+				}
+				return PineApple.error(this.value.error);
+			},
+
+			chainError: async <R, const F extends PineError>(
+				fun: (data: E) => Promise<PineApple<R, F>>,
+			): Promise<PineApple<T | R, F>> => {
+				if (!this.value.success) {
+					const p = await fun(this.value.error);
+					if (p.value.success) return PineApple.ok(p.value.data);
+					return PineApple.error(p.value.error);
+				}
+				return PineApple.ok(this.value.data);
+			},
+		};
+	}
 
 	public get outcome(): PineType<T, E> {
 		return this.value;
