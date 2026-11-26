@@ -80,6 +80,17 @@ export default class PineApple<T, const E extends PineError> {
 		return PineApple.error(this.value.error);
 	}
 
+	public chainError<R, const F extends PineError>(
+		fun: (data: E) => PineApple<R, F>,
+	): PineApple<T | R, F> {
+		if (!this.value.success) {
+			const p = fun(this.value.error);
+			if (p.value.success) return PineApple.ok(p.value.data);
+			return PineApple.error(p.value.error);
+		}
+		return PineApple.ok(this.value.data);
+	}
+
 	public readonly promise = {
 		onOk: async (
 			fun: (data: T) => Promise<unknown>,
@@ -125,6 +136,17 @@ export default class PineApple<T, const E extends PineError> {
 				return PineApple.error(p.value.error);
 			}
 			return PineApple.error(this.value.error);
+		},
+
+		chainError: async <R, const F extends PineError>(
+			fun: (data: E) => Promise<PineApple<R, F>>,
+		): Promise<PineApple<T | R, F>> => {
+			if (!this.value.success) {
+				const p = await fun(this.value.error);
+				if (p.value.success) return PineApple.ok(p.value.data);
+				return PineApple.error(p.value.error);
+			}
+			return PineApple.ok(this.value.data);
 		},
 	};
 
