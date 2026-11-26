@@ -18,12 +18,12 @@ export default class PineApple<T, const E extends PineError> {
 	public static attempt<R, K extends string>(
 		fun: () => R,
 		kind: K,
-	): PineApple<R, { kind: K; error: unknown }> {
+	): PineApple<R, { kind: K; cause: unknown }> {
 		try {
 			const r = fun();
 			return PineApple.ok(r);
-		} catch (error) {
-			return PineApple.error({ kind, error });
+		} catch (cause) {
+			return PineApple.error({ kind, cause });
 		}
 	}
 
@@ -31,12 +31,12 @@ export default class PineApple<T, const E extends PineError> {
 		attempt: async <R, K extends string>(
 			fun: () => Promise<R>,
 			kind: K,
-		): Promise<PineApple<R, { kind: K; error: unknown }>> => {
+		): Promise<PineApple<R, { kind: K; cause: unknown }>> => {
 			try {
 				const r = await fun();
 				return PineApple.ok(r);
-			} catch (error) {
-				return PineApple.error({ kind, error });
+			} catch (cause) {
+				return PineApple.error({ kind, cause });
 			}
 		},
 	};
