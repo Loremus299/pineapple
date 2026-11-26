@@ -49,6 +49,14 @@ export default class PineApple<T, const E extends PineError> {
 		return PineApple.error(this.value.error);
 	}
 
+	public onError(fun: (data: E) => unknown): PineApple<T, E> {
+		if (!this.value.success) {
+			fun(this.value.error);
+			return PineApple.error(this.value.error);
+		}
+		return PineApple.ok(this.value.data);
+	}
+
 	public mapOk<R>(fun: (data: T) => R): PineApple<R, E> {
 		if (this.value.success) return PineApple.ok(fun(this.value.data));
 		return PineApple.error(this.value.error);
@@ -74,6 +82,16 @@ export default class PineApple<T, const E extends PineError> {
 				return PineApple.ok(this.value.data);
 			}
 			return PineApple.error(this.value.error);
+		},
+
+		onError: async (
+			fun: (data: E) => Promise<unknown>,
+		): Promise<PineApple<T, E>> => {
+			if (!this.value.success) {
+				await fun(this.value.error);
+				return PineApple.error(this.value.error);
+			}
+			return PineApple.ok(this.value.data);
 		},
 
 		mapOk: async <R>(
