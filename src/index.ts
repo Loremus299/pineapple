@@ -91,37 +91,6 @@ export default class PineApple<T, const E extends PineError> {
 		return PineApple.ok(this.value.data);
 	}
 
-	public nth(
-		this: PineApple<T[], E>,
-		n: number,
-	): PineApple<
-		T,
-		E | { kind: "IndexOutOfBounds"; index: number; length: number }
-	> {
-		if (this.value.success) {
-			const e = this.value.data.at(n);
-			if (e) return PineApple.ok(e);
-			return PineApple.error({
-				kind: "IndexOutOfBounds",
-				index: n,
-				length: this.value.data.length,
-			});
-		}
-		return PineApple.error(this.value.error);
-	}
-
-	public consume<C>(consumers: {
-		[K in E["kind"]]: (error: Extract<E, { kind: K }>) => C;
-	}): PineApple<T, { kind: "Consumed"; object: C }> {
-		if (this.value.success) return PineApple.ok(this.value.data);
-		const e = this.value.error;
-		const consume = consumers[e.kind as E["kind"]] as (e: E) => C;
-		return PineApple.error<T, { kind: "Consumed"; object: C }>({
-			kind: "Consumed",
-			object: consume(e),
-		});
-	}
-
 	public get promise() {
 		return {
 			onOk: async (
@@ -181,6 +150,37 @@ export default class PineApple<T, const E extends PineError> {
 				return PineApple.ok(this.value.data);
 			},
 		};
+	}
+
+	public nth(
+		this: PineApple<T[], E>,
+		n: number,
+	): PineApple<
+		T,
+		E | { kind: "IndexOutOfBounds"; index: number; length: number }
+	> {
+		if (this.value.success) {
+			const e = this.value.data.at(n);
+			if (e) return PineApple.ok(e);
+			return PineApple.error({
+				kind: "IndexOutOfBounds",
+				index: n,
+				length: this.value.data.length,
+			});
+		}
+		return PineApple.error(this.value.error);
+	}
+
+	public consume<C>(consumers: {
+		[K in E["kind"]]: (error: Extract<E, { kind: K }>) => C;
+	}): PineApple<T, { kind: "Consumed"; object: C }> {
+		if (this.value.success) return PineApple.ok(this.value.data);
+		const e = this.value.error;
+		const consume = consumers[e.kind as E["kind"]] as (e: E) => C;
+		return PineApple.error<T, { kind: "Consumed"; object: C }>({
+			kind: "Consumed",
+			object: consume(e),
+		});
 	}
 
 	public get outcome(): PineType<T, E> {
