@@ -27,6 +27,37 @@ export default class PineApple<T, const E extends PineError> {
 		}
 	}
 
+	public static settle<
+		const P extends PineApple<any, any extends PineError ? any : never>[],
+	>(
+		pines: P,
+	): PineApple<
+		{ [K in keyof P]: P[K] extends PineApple<infer T, any> ? T : never },
+		{
+			kind: "SettlementError";
+			errors: {
+				[K in keyof P]: P[K] extends PineApple<any, infer E> ? E : never;
+			};
+		}
+	> {
+		const data: unknown[] = [];
+		const errors: unknown[] = [];
+		let failed = false;
+
+		for (const { value } of pines) {
+			data.push(value.success ? value.data : undefined);
+			errors.push(value.success ? undefined : value.error);
+			if (!value.success) failed = true;
+		}
+
+		if (failed)
+			return PineApple.error({
+				kind: "SettlementError",
+				errors: errors as any,
+			});
+		return PineApple.ok(data as any);
+	}
+
 	public static readonly promise = {
 		attempt: async <R, K extends string>(
 			fun: () => Promise<R>,
@@ -38,6 +69,42 @@ export default class PineApple<T, const E extends PineError> {
 			} catch (cause) {
 				return PineApple.error({ kind, cause });
 			}
+		},
+
+		settle: async <
+			const P extends Promise<
+				PineApple<any, any extends PineError ? any : never>
+			>[],
+		>(
+			pines: P,
+		): Promise<
+			PineApple<
+				{ [K in keyof P]: P[K] extends PineApple<infer T, any> ? T : never },
+				{
+					kind: "SettlementError";
+					errors: {
+						[K in keyof P]: P[K] extends PineApple<any, infer E> ? E : never;
+					};
+				}
+			>
+		> => {
+			const data: unknown[] = [];
+			const errors: unknown[] = [];
+			let failed = false;
+
+			for (const pine of pines) {
+				const { outcome } = await pine;
+				data.push(outcome.success ? outcome.data : undefined);
+				errors.push(outcome.success ? undefined : outcome.error);
+				if (!outcome.success) failed = true;
+			}
+
+			if (failed)
+				return PineApple.error({
+					kind: "SettlementError",
+					errors: errors as any,
+				});
+			return PineApple.ok(data as any);
 		},
 	};
 
@@ -161,7 +228,7 @@ export default class PineApple<T, const E extends PineError> {
 	> {
 		if (this.value.success) {
 			const e = this.value.data.at(n);
-			if (e) return PineApple.ok(e);
+			if (typeof e !== "undefined") return PineApple.ok(e);
 			return PineApple.error({
 				kind: "IndexOutOfBounds",
 				index: n,
