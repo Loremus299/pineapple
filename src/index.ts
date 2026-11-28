@@ -152,11 +152,11 @@ export default class PineApple<T, const E extends PineError> {
 		};
 	}
 
-	public nth(
-		this: PineApple<T[], E>,
+	public nth<U>(
+		this: PineApple<U[], E>,
 		n: number,
 	): PineApple<
-		T,
+		U,
 		E | { kind: "IndexOutOfBounds"; index: number; length: number }
 	> {
 		if (this.value.success) {
